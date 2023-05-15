@@ -83,4 +83,4 @@ function tryFill(slot, except) {
     return false;
 }
 
-let slots = [...$$(".digit-slots")];
+let slots = [...$(".digit-slots")];
