@@ -1,18 +1,64 @@
-// קבלת משבצת לפי מיקומה
+// קבלת משבצת לפי מיקום
 function getSlot(x,y) {
-    return document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+    return $(`[data-x="${x}"][data-y="${y}"]`);
 }
- 
-// קבלת המשבצות עם מספר פלוני, מתוך מערך
-function slotsWithNum(slots, numToSearch) {
-    return slots.filter(slot=> slot.innerText === numToSearch);
+
+let gs = getSlot;
+
+
+let slots = $(".digit-slot");
+
+//קבלת המשבצות הרלוונטיות למשבצת נתונה 
+function members(meSlot) {
+    const x = meSlot.getAttribute("data-x"),
+          y = meSlot.getAttribute("data-y"),
+          id = meSlot.id,
+          list = $(`[data-general-slot]:has(#${id}) .digit-slot:not(#${id}),
+                  [data-x="${x}"]:not(#${id}),
+                  [data-y="${y}"]:not(#${id})`);
+          return list;
 }
-//*
+
+// בדיקה האם משבצת יכולה לקבל מספר מסוים
+
+function isPossibule(meSlot, _num) {
+    const num = _num.toString(),
+        membersWithThisNum = members(meSlot).toArray().filter((slot) => slot.innerHTML === num); // !
+    return membersWithThisNum.length === 0;
+}
+
+// נסה למלא את המשבצת והחזר תשובה אם הצלחת
+function tryFill(slot, except) {
+    for (let i = 1; i <= 9; i++) {
+        if (i !== except && isPossibule(slot, i)) {
+            slot.innerHTML = i;
+            return true;
+        }
+    }
+    return false;
+}
+
+
+function fill(index, except) {
+    console.log("index: " + index)
+    if (index > 14) {
+        return;
+    }
+    if (tryFill(slots.get(index), except)) {
+        fill (index + 1);
+    }
+
+    else {
+        fill (index - 1, slots.get(index - 1).innerHTML)
+    }
+}
+
+
 // החזרת מערך ללא רכיב פלוני (זמני)
 Array.prototype.takeOut = function(item) {
     return this.filter(i=> i !== item);
 }
-*//
+
 
 // בדיקה אם המספר הנוכחי של משבצת חוקי
 function isValid(meSlot) {
@@ -25,22 +71,6 @@ function isValid(meSlot) {
     return false;
 }
 
-function isPossibule(meSlot, _num) {
-    const num = _num.toString(),
-        membersWithThisNum = members(meSlot).filter(slot => slot.innerText === num);
-    return membersWithThisNum.length === 0;
-}
-
-function members(meSlot) {
-    const meSlotX = meSlot.getAttribute("data-x"),
-        meSlotY = meSlot.getAttribute("data-y"),
-        membersX = [...$$(`[data-x="${meSlotX}"]`)],
-        membersY = [...$$(`[data-y="${meSlotY}"]`)],
-        membersInGeneral = [...meSlot.parentNode.parentNode.querySelectorAll(".number-slot")].takeOut(meSlot), // לקצר
-        allMembers = [].concat(membersInGeneral, membersX, membersY).takeOut(meSlot);
-        return Array.from(new Set(allMembers));
-}
-
 // סימון משבצת כלא חוקית
 function warn(slot) {
     let hihuv = setInterval(() => slot.style.backgroundColor = slot.style.backgroundColor === "red" ? "" : "red", 300)
@@ -50,37 +80,9 @@ function warn(slot) {
             }, 3000);
 }
 
-// החזרת מערך בי רכיב פלוני
-Array.prototype.takeOut = function(item) {
-    return this.filter(i=> i !== item);
-}
 
 //ניקוי עיצוב משבצות
 function clear(){[...$$(".number-slot")].forEach(o=>o.style={})}
 
-// יציררת סודוקו
-function fill(index, except) {
-    console.log("index is " + index)
-    if (index > 80) {
-        return;
-    }
-    if (tryFill(slots[index], except)) {
-        fill (index + 1);
-    }
-
-    else {
-        fill (index - 1, slots[index - 1].innerHTML)
-    }
-}
-
-function tryFill(slot, except) {
-    for (let i = 1; i <= 9; i++) {
-        if (i !== except && isPossibule(slot, i)) {
-            slot.innerHTML = i;
-            return true;
-        }
-    }
-    return false;
-}
-
-let slots = [...$(".digit-slots")];
+// מילוי הטבלה בערכים רנדומליים
+function f () {$$(".digit-slot").forEach(o=>o.innerHTML= Math.floor(Math.random()*8)+1);}
